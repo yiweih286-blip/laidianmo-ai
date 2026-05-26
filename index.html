@@ -108,6 +108,17 @@ body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;b
   </div>
 </div>
 
+<!-- 密码弹窗 -->
+<div class="mask" id="pwMask" style="z-index:10001"></div>
+<div class="pw-dialog" id="pwDialog" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10002;background:#fff;border-radius:12px;padding:24px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+  <h3 style="margin:0 0 16px;font-size:16px;color:#1a1a1a">🔐 请输入管理密码</h3>
+  <input id="pwInput" type="password" placeholder="输入密码" style="width:100%;padding:10px 12px;border:1px solid #e0d8c8;border-radius:8px;font-size:16px;outline:none;box-sizing:border-box">
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <button onclick="closePwDialog()" style="flex:1;padding:10px;border:1px solid #e0d8c8;border-radius:8px;background:#f5f0e8;font-size:14px;cursor:pointer">取消</button>
+    <button onclick="submitPw()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#5c3a21;color:#fff;font-size:14px;cursor:pointer">确定</button>
+  </div>
+</div>
+
 <!-- 管理面板 -->
 <div class="mask" id="adminMask"></div>
 <div class="admin" id="adminPanel">
@@ -276,9 +287,25 @@ function buildContext(q,data){
 // ========== 长按进入管理 ==========
 let pressTimer=null;
 const hdr=document.getElementById('hdr');
-hdr.addEventListener('touchstart',()=>{pressTimer=setTimeout(()=>{const pw=prompt('请输入管理密码：');if(pw===getPw())openAdmin();else if(pw)alert('密码错误')},3000)});
+function showPwDialog(){
+  document.getElementById('pwDialog').style.display='block';
+  document.getElementById('pwMask').style.display='block';
+  document.getElementById('pwInput').value='';
+  setTimeout(()=>document.getElementById('pwInput').focus(),100);
+}
+function closePwDialog(){
+  document.getElementById('pwDialog').style.display='none';
+  document.getElementById('pwMask').style.display='none';
+}
+function submitPw(){
+  const pw=document.getElementById('pwInput').value;
+  if(pw===getPw()){closePwDialog();openAdmin()}
+  else if(pw){document.getElementById('pwInput').value='';document.getElementById('pwInput').placeholder='密码错误，重新输入';setTimeout(()=>document.getElementById('pwInput').placeholder='输入密码',2000)}
+}
+hdr.addEventListener('touchstart',()=>{pressTimer=setTimeout(showPwDialog,3000)});
 hdr.addEventListener('touchend',()=>clearTimeout(pressTimer));
 hdr.addEventListener('touchmove',()=>clearTimeout(pressTimer));
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitPw()});
 
 function openAdmin(){document.getElementById('adminMask').classList.add('show');document.getElementById('adminPanel').classList.add('show');switchTab('org')}
 function closeAdmin(){document.getElementById('adminMask').classList.remove('show');document.getElementById('adminPanel').classList.remove('show')}
