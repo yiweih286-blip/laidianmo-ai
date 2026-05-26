@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>来点墨书法艺术培训中心</title>
+<style>
+:root{--ink:#1a1a1a;--brown:#5c3a21;--brown-l:#8B4513;--gold:#c8a45c;--paper:#f5f0e8;--paper-l:#faf7f2;--white:#fefdfb;--red:#c23a2b;--green:#2d8a4e;--gray:#666;--gray-l:#999;--border:#e0d8c8}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;-webkit-tap-highlight-color:transparent;overflow:auto;-webkit-overflow-scrolling:touch}
+body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;background:var(--paper);color:var(--ink)}
+.app{display:flex;flex-direction:column;height:100vh;max-width:500px;margin:0 auto;background:var(--paper-l)}
+.hdr{background:linear-gradient(135deg,#2c2c2c,#5c3a21);color:#f5f0e8;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;user-select:none}
+.hdr .seal{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+.hdr .info{flex:1}
+.hdr .info h1{font-size:14px;font-weight:600}
+.hdr .info p{font-size:10px;opacity:.7;margin-top:1px}
+.hdr .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:#4ade80;margin-right:3px;vertical-align:middle}
+.sync{font-size:10px;padding:4px 12px;text-align:center;flex-shrink:0}
+.sync.ok{background:#e8f5e9;color:#2d8a4e}
+.sync.err{background:#fce4ec;color:#c23a2b}
+.sync.load{background:#fff3e0;color:#e65100}
+.msgs{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.msg{display:flex;gap:8px;margin-bottom:12px;animation:fu .3s ease}
+.msg.user{flex-direction:row-reverse}
+.msg .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.msg.bot .av{background:var(--red);color:#fff}
+.msg.user .av{background:var(--brown);color:#fff}
+.msg .bbl{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;word-break:break-word}
+.msg.bot .bbl{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px}
+.msg.user .bbl{background:var(--brown);color:#f5f0e8;border-top-right-radius:4px}
+.msg .bbl .pr{color:var(--red);font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tags button{padding:5px 10px;border-radius:12px;border:1px solid var(--border);background:var(--white);color:var(--brown);font-size:12px;cursor:pointer}
+.tags button:active{background:var(--brown);color:#fff}
+.typing{display:flex;gap:4px;padding:4px 0}
+.typing span{width:7px;height:7px;background:var(--gray-l);border-radius:50%;animation:ty 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes ty{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ftr{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--paper-l)}
+.ftr .iw{display:flex;gap:8px;align-items:flex-end}
+.ftr textarea{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:14px;outline:none;resize:none;max-height:80px;background:var(--white)}
+.ftr textarea:focus{border-color:var(--brown)}
+.ftr button{width:38px;height:38px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--brown),var(--brown-l));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ftr button:disabled{opacity:.5}
+.ftr button svg{width:18px;height:18px}
+.hint{font-size:10px;color:var(--gray-l);text-align:center;margin-top:4px}
+
+/* 管理面板 */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none}
+.mask.show{display:block}
+.admin{position:fixed;inset:0;z-index:101;display:none;flex-direction:column;background:var(--paper-l)}
+.admin.show{display:flex}
+.admin-hdr{background:var(--brown);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.admin-hdr h2{font-size:15px}
+.admin-hdr button{border:none;background:none;font-size:20px;color:#fff;cursor:pointer;padding:4px 8px}
+.admin-tabs{display:flex;overflow-x:auto;padding:8px 12px;gap:6px;border-bottom:1px solid var(--border);flex-shrink:0;-webkit-overflow-scrolling:touch}
+.admin-tabs button{padding:6px 12px;border-radius:14px;border:1px solid var(--border);background:var(--white);color:var(--ink);font-size:12px;white-space:nowrap;cursor:pointer}
+.admin-tabs button.active{background:var(--brown);color:#fff;border-color:var(--brown)}
+.admin-body{flex:1;overflow-y:auto;padding:12px 16px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.admin-body label{display:block;font-size:12px;color:var(--gray);margin:8px 0 3px}
+.admin-body input,.admin-body textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--paper-l)}
+.admin-body input:focus,.admin-body textarea:focus{border-color:var(--brown)}
+.admin-body textarea{min-height:60px;resize:vertical}
+.add-btn{width:100%;padding:10px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--brown),var(--brown-l));color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px}
+.item-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.item-card .name{font-weight:600;font-size:13px}
+.item-card .meta{font-size:11px;color:var(--gray);margin-top:4px}
+.item-card .acts{margin-top:6px;display:flex;gap:6px}
+.item-card .acts button{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);color:var(--red);font-size:11px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr" id="hdr">
+    <div class="seal">墨</div>
+    <div class="info">
+      <h1>来点墨书法艺术培训中心</h1>
+      <p><span class="dot"></span>小墨在线 · AI智能客服</p>
+    </div>
+  </div>
+  <div class="sync load" id="syncBar">⏳ 连接中...</div>
+  <div class="msgs" id="msgs">
+    <div class="msg bot">
+      <div class="av">墨</div>
+      <div class="bbl">
+        <p>您好！我是小墨，来点墨书法艺术培训中心的AI智能顾问 🎨</p>
+        <p style="margin-top:6px">很高兴为您解答关于书法课程的任何问题！</p>
+        <div class="tags">
+          <button onclick="Q('有哪些课程？')">📚 课程介绍</button>
+          <button onclick="Q('学费多少钱？')">💰 学费咨询</button>
+          <button onclick="Q('上课时间怎么安排？')">🕐 上课时间</button>
+          <button onclick="Q('老师怎么样？')">👨‍🏫 师资力量</button>
+          <button onclick="Q('5岁可以学吗？')">👶 适合年龄</button>
+          <button onclick="Q('可以试听吗？')">🎧 试听体验</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ftr">
+    <div class="iw">
+      <textarea id="inp" placeholder="输入您想了解的问题..." rows="1" maxlength="500"></textarea>
+      <button id="sendBtn" onclick="S()"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+    </div>
+    <div class="hint">按 Enter 发送</div>
+  </div>
+</div>
+
+<!-- 管理面板 -->
+<div class="mask" id="adminMask"></div>
+<div class="admin" id="adminPanel">
+  <div class="admin-hdr"><h2>⚙️ 管理后台</h2><button onclick="closeAdmin()">✕</button></div>
+  <div class="admin-tabs" id="adminTabs"></div>
+  <div class="admin-body" id="adminBody"></div>
+</div>
+
+<script>
+// ========== Gitee 云存储配置 ==========
+const GITEE_CONFIG = {
+  token: '647c383bd51200fbc516d76266fcf19e',
+  owner: 'lin041006',
+  repo: 'laidianmo',
+  branch: 'master',
+  file: 'data.json'
+};
+let useCloud = true;
+
+const PW_KEY = 'laidianmo_pw';
+const DB_KEY = 'laidianmo_db';
+let getPw = () => localStorage.getItem(PW_KEY) || '888888';
+let cachedData = null;
+
+// ========== 默认数据 ==========
+function defaultData() {
+  return {
+    org:{name:"来点墨书法艺术培训中心",slogan:"以墨养心，以书育人",intro:"来点墨书法艺术培训中心是一家专注于书法艺术教育的专业培训机构。",phone:"400-888-6688",wechat:"laidianmo_art",philosophy:"书法不仅是技艺的传承，更是心性的修炼。"},
+    courses:[
+      {id:1,name:"少儿硬笔启蒙班",cat:"硬笔书法",desc:"从握笔姿势到基本笔画，系统培养规范书写习惯。",age:"5-7岁",level:"启蒙",dur:"60分钟/次",sessions:16,price:1280,unit:"元/期",max:12,hl:"趣味教学,握笔矫正,笔画基础,作业辅导"},
+      {id:2,name:"少儿硬笔提高班",cat:"硬笔书法",desc:"提升字形结构美感，培养书写速度与质量。",age:"7-10岁",level:"初级",dur:"60分钟/次",sessions:16,price:1480,unit:"元/期",max:12,hl:"结构训练,提速书写,卷面美化,考级辅导"},
+      {id:3,name:"硬笔行书班",cat:"硬笔书法",desc:"学习行书连笔技巧，提升日常书写效率。",age:"10岁以上",level:"中级",dur:"90分钟/次",sessions:16,price:1680,unit:"元/期",max:10,hl:"连笔技巧,行书规范,日常应用,作品创作"},
+      {id:4,name:"少儿毛笔启蒙班",cat:"毛笔书法",desc:"从文房四宝认识开始，学习基本笔画与简单汉字。",age:"6-8岁",level:"启蒙",dur:"90分钟/次",sessions:16,price:1580,unit:"元/期",max:10,hl:"笔墨启蒙,基本笔画,简单汉字,书法文化"},
+      {id:5,name:"毛笔楷书班",cat:"毛笔书法",desc:"系统学习楷书技法，从颜柳欧赵入手。",age:"8-12岁",level:"初级",dur:"90分钟/次",sessions:16,price:1780,unit:"元/期",max:10,hl:"楷书技法,碑帖临摹,创作入门,考级辅导"},
+      {id:6,name:"毛笔行草班",cat:"毛笔书法",desc:"学习行书草书技法，提升书法艺术表现力。",age:"12岁以上",level:"高级",dur:"90分钟/次",sessions:16,price:1980,unit:"元/期",max:8,hl:"行草技法,创作提升,参展辅导"},
+      {id:7,name:"少儿国画启蒙班",cat:"国画",desc:"从水墨游戏入手，培养绘画兴趣和观察力。",age:"6-10岁",level:"启蒙",dur:"90分钟/次",sessions:16,price:1580,unit:"元/期",max:10,hl:"水墨游戏,基础技法,花鸟入门,创意表达"},
+      {id:8,name:"篆刻入门班",cat:"篆刻",desc:"学习篆刻基础，感受方寸之间的艺术魅力。",age:"10岁以上",level:"入门",dur:"90分钟/次",sessions:12,price:1680,unit:"元/期",max:8,hl:"篆书基础,刻刀技法,印章设计,作品创作"},
+      {id:9,name:"成人毛笔修身班",cat:"毛笔书法",desc:"以书修心，在繁忙生活中找到一份宁静。",age:"成人",level:"入门",dur:"90分钟/次",sessions:16,price:1880,unit:"元/期",max:12,hl:"修身养性,经典临摹,自由创作,文化交流"}
+    ],
+    teachers:[
+      {id:1,name:"王墨轩",title:"高级书法教师",spec:"毛笔楷书、行书",exp:"15年教龄",edu:"中国美术学院书法硕士",award:"全国书法大赛金奖",bio:"教学风格严谨而不失趣味，善于引导学生发现书法之美。"},
+      {id:2,name:"李清竹",title:"资深硬笔教师",spec:"硬笔书法、规范字",exp:"10年教龄",edu:"南京艺术学院书法本科",award:"全国硬笔书法大赛一等奖",bio:"独创趣味笔画法，让孩子在快乐中掌握规范书写。"},
+      {id:3,name:"张丹青",title:"国画教师",spec:"花鸟画、山水画",exp:"8年教龄",edu:"中央美术学院国画硕士",award:"全国青年国画展优秀奖",bio:"注重培养学生的观察力和创造力，课堂生动有趣。"},
+      {id:4,name:"陈石安",title:"篆刻教师",spec:"篆刻、篆书",exp:"12年教龄",edu:"西泠印社研修",award:"西泠印社篆刻展入展",bio:"教学细致入微，让学生感受方寸之间的艺术魅力。"}
+    ],
+    schedules:[
+      {id:1,course:"少儿硬笔启蒙班",day:"周六",time:"09:00-10:00",teacher:"李清竹",campus:"总部校区",cur:8,max:12},
+      {id:2,course:"少儿硬笔启蒙班",day:"周日",time:"09:00-10:00",teacher:"李清竹",campus:"总部校区",cur:6,max:12},
+      {id:3,course:"少儿硬笔提高班",day:"周六",time:"10:30-11:30",teacher:"李清竹",campus:"总部校区",cur:10,max:12},
+      {id:4,course:"少儿毛笔启蒙班",day:"周六",time:"14:00-15:30",teacher:"王墨轩",campus:"总部校区",cur:7,max:10},
+      {id:5,course:"毛笔楷书班",day:"周日",time:"14:00-15:30",teacher:"王墨轩",campus:"总部校区",cur:9,max:10},
+      {id:6,course:"少儿国画启蒙班",day:"周六",time:"15:30-17:00",teacher:"张丹青",campus:"总部校区",cur:5,max:10},
+      {id:7,course:"少儿硬笔启蒙班",day:"周六",time:"09:30-10:30",teacher:"李清竹",campus:"海淀校区",cur:4,max:12},
+      {id:8,course:"少儿毛笔启蒙班",day:"周日",time:"09:30-11:00",teacher:"王墨轩",campus:"海淀校区",cur:6,max:10},
+      {id:9,course:"硬笔行书班",day:"周日",time:"14:00-15:30",teacher:"李清竹",campus:"海淀校区",cur:3,max:10},
+      {id:10,course:"成人毛笔修身班",day:"周三",time:"19:00-20:30",teacher:"王墨轩",campus:"总部校区",cur:8,max:12},
+      {id:11,course:"篆刻入门班",day:"周六",time:"15:30-17:00",teacher:"陈石安",campus:"总部校区",cur:5,max:8}
+    ],
+    campuses:[
+      {id:1,name:"来点墨·总部校区",addr:"北京市朝阳区建国路88号SOHO现代城A座3层",phone:"010-88886666",hours:"周一至周日 9:00-21:00",transport:"地铁1号线大望路站B口步行5分钟"},
+      {id:2,name:"来点墨·海淀校区",addr:"北京市海淀区中关村大街18号科贸中心2层",phone:"010-62227777",hours:"周一至周日 9:00-20:30",transport:"地铁4号线中关村站C口步行3分钟"}
+    ],
+    faqs:[
+      {id:1,cat:"上课",q:"几岁可以开始学书法？",a:"硬笔书法5岁即可开始，毛笔书法建议6岁以上。具体还要看孩子的专注力和手部发育情况，可以来体验课让老师评估。"},
+      {id:2,cat:"上课",q:"一节课多长时间？",a:"硬笔班60分钟/次，毛笔班和国画班90分钟/次。课程时长根据孩子注意力特点设计，保证学习效果。"},
+      {id:3,cat:"上课",q:"硬笔和毛笔先学哪个？",a:"5-7岁建议先学硬笔，打好规范书写基础；7岁以上如对传统文化感兴趣，可同时学习毛笔。两者相辅相成。"},
+      {id:4,cat:"费用",q:"学费包含什么？",a:"学费包含课时费、课堂用纸墨、学习资料。硬笔班需自备笔，毛笔班首期赠送文房四宝套装。"},
+      {id:5,cat:"费用",q:"可以退费吗？",a:"开课前可全额退费；开课后按未上课时比例退费。具体退费政策请咨询校区前台。"},
+      {id:6,cat:"其他",q:"有考级培训吗？",a:"有的！我们提供书法等级考试辅导，考级通过率95%以上，老师会根据学员水平推荐合适的考级等级。"},
+      {id:7,cat:"其他",q:"上课需要带什么？",a:"硬笔班自带铅笔/钢笔；毛笔班首期赠送文房四宝，后续自备毛笔和墨汁，纸张由中心提供；国画班画具由中心提供。"},
+      {id:8,cat:"报名",q:"可以试听吗？",a:"当然可以！我们提供免费体验课，请告诉我您孩子的年龄和感兴趣的方向，我帮您安排合适的体验课。"}
+    ],
+    promotions:[
+      {id:1,title:"新学期报名优惠",desc:"新学期报名享9折，老学员续费8.5折",value:"新学员9折，老学员8.5折",dates:"2026.3.1-6.30",cond:"每人限享一次，不与其他优惠叠加"},
+      {id:2,title:"两人同行优惠",desc:"两人同时报名各减200元",value:"每人减200元",dates:"全年",cond:"需同时报名同一课程"},
+      {id:3,title:"体验课赠礼",desc:"预约体验课即赠精美书法练习册",value:"赠送书法练习册",dates:"全年",cond:"每位学员限领一次"}
+    ]
+  };
+}
+
+// ========== 数据读写（Gitee云 + 本地缓存） ==========
+function getLocalDB(){try{return JSON.parse(localStorage.getItem(DB_KEY))}catch{return null}}
+function saveLocalDB(d){localStorage.setItem(DB_KEY,JSON.stringify(d))}
+
+async function loadDB(){
+  // 优先从Gitee云端加载
+  if(useCloud){
+    try{
+      const url=`https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/contents/${GITEE_CONFIG.file}?ref=${GITEE_CONFIG.branch}&access_token=${GITEE_CONFIG.token}`;
+      const r=await fetch(url);
+      if(r.ok){
+        const d=await r.json();
+        if(d.content){
+          const data=JSON.parse(atob(d.content));
+          // 缓存到本地
+          saveLocalDB(data);
+          // 记录SHA用于后续更新
+          GITEE_CONFIG._sha=d.sha;
+          return data;
+        }
+      }
+    }catch(e){console.error('Gitee load:',e)}
+  }
+  return getLocalDB()||defaultData();
+}
+
+async function saveDB(data){
+  // 保存到本地
+  saveLocalDB(data);
+  // 保存到Gitee云端
+  if(useCloud){
+    try{
+      const url=`https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/contents/${GITEE_CONFIG.file}`;
+      const body={
+        access_token:GITEE_CONFIG.token,
+        content:btoa(unescape(encodeURIComponent(JSON.stringify(data)))),
+        message:'更新数据',
+        branch:GITEE_CONFIG.branch
+      };
+      // 如果有SHA，说明文件已存在，用PUT更新
+      if(GITEE_CONFIG._sha){
+        body.sha=GITEE_CONFIG._sha;
+        const r=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const d=await r.json();
+        if(d.content) GITEE_CONFIG._sha=d.content.sha;
+      }else{
+        // 首次创建
+        const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const d=await r.json();
+        if(d.content) GITEE_CONFIG._sha=d.content.sha;
+      }
+    }catch(e){console.error('Gitee save:',e)}
+  }
+}
+
+async function getData(){if(!cachedData)cachedData=await loadDB();return cachedData}
+
+// ========== 智能检索 ==========
+const KW={价格:['价格','费用','多少钱','收费','学费','优惠','折扣'],课程:['课程','班','课','学什么','教什么','内容','科目'],时间:['时间','什么时候','几点','课表','排课','周末','平时'],老师:['老师','教师','师资','谁教','教学'],年龄:['年龄','几岁','多大','适合','少儿','成人','小孩'],报名:['报名','怎么报','试听','体验','预约'],地址:['地址','在哪','位置','校区','怎么去','交通'],硬笔:['硬笔','铅笔','钢笔','写字'],毛笔:['毛笔','软笔','楷书','行书','草书'],国画:['国画','水墨','花鸟','山水'],篆刻:['篆刻','印章']};
+
+function getTags(q){const t=[];for(const[k,v]of Object.entries(KW))if(v.some(w=>q.includes(w)))t.push(k);return t}
+
+function buildContext(q,data){
+  const tags=getTags(q);const parts=[];
+  const org=data.org;
+  if(org)parts.push(`【机构】${org.name} | ${org.slogan}\n简介：${org.intro}\n电话：${org.phone}${org.wechat?' | 微信：'+org.wechat:''}`);
+  if(data.courses?.length){
+    let cs=data.courses;
+    if(tags.length)cs=cs.filter(c=>tags.some(t=>(c.cat||'').includes(t)||(c.age||'').includes(t)||(c.name||'').includes(t)||(c.level||'').includes(t)));
+    if(!cs.length)cs=data.courses.slice(0,5);
+    parts.push('【课程】\n'+cs.map(c=>`- ${c.name}（${c.cat}）| ${c.age} | ${c.level} | ${c.price}${c.unit} | ${c.dur} | 共${c.sessions}次 | ≤${c.max}人${c.desc?'\n  '+c.desc:''}`).join('\n'));
+  }
+  if(data.teachers?.length)parts.push('【教师】\n'+data.teachers.map(t=>`- ${t.name}（${t.title}）| 擅长：${t.spec} | ${t.exp} | ${t.edu}`).join('\n'));
+  if(data.schedules?.length)parts.push('【课表】\n'+data.schedules.map(s=>`- ${s.course} | ${s.day} ${s.time} | ${s.teacher} | ${s.campus} | ${s.cur}/${s.max}人`).join('\n'));
+  if(data.campuses?.length)parts.push('【校区】\n'+data.campuses.map(c=>`- ${c.name} | ${c.addr} | ${c.phone} | ${c.hours}`).join('\n'));
+  if(data.promotions?.length)parts.push('【优惠】\n'+data.promotions.map(p=>`- ${p.title} | ${p.value}${p.cond?' | 条件：'+p.cond:''}`).join('\n'));
+  if(data.faqs?.length){
+    let fs=data.faqs;
+    if(tags.length)fs=fs.filter(f=>tags.some(t=>(f.cat||'').includes(t)||(f.q||'').includes(q)));
+    if(!fs.length)fs=data.faqs.slice(0,3);
+    parts.push('【FAQ】\n'+fs.map(f=>`- Q：${f.q}\n  A：${f.a}`).join('\n'));
+  }
+  return parts.join('\n\n')||'（暂无数据）';
+}
+
+// ========== 长按进入管理 ==========
+let pressTimer=null;
+const hdr=document.getElementById('hdr');
+hdr.addEventListener('touchstart',()=>{pressTimer=setTimeout(()=>{const pw=prompt('请输入管理密码：');if(pw===getPw())openAdmin();else if(pw)alert('密码错误')},3000)});
+hdr.addEventListener('touchend',()=>clearTimeout(pressTimer));
+hdr.addEventListener('touchmove',()=>clearTimeout(pressTimer));
+
+function openAdmin(){document.getElementById('adminMask').classList.add('show');document.getElementById('adminPanel').classList.add('show');switchTab('org')}
+function closeAdmin(){document.getElementById('adminMask').classList.remove('show');document.getElementById('adminPanel').classList.remove('show')}
+
+// ========== 管理面板 ==========
+const TABS=[{k:'org',l:'机构'},{k:'courses',l:'课程'},{k:'teachers',l:'教师'},{k:'schedules',l:'课表'},{k:'campuses',l:'校区'},{k:'faqs',l:'FAQ'},{k:'promotions',l:'优惠'},{k:'password',l:'密码'}];
+const FIELDS={org:[{k:'name',l:'机构名称'},{k:'slogan',l:'标语'},{k:'intro',l:'简介',t:'textarea'},{k:'phone',l:'咨询电话'},{k:'wechat',l:'微信号'},{k:'philosophy',l:'教学理念',t:'textarea'}],courses:[{k:'name',l:'课程名'},{k:'cat',l:'分类'},{k:'desc',l:'描述',t:'textarea'},{k:'age',l:'适合年龄'},{k:'level',l:'级别'},{k:'dur',l:'课时时长'},{k:'sessions',l:'总课时',t:'number'},{k:'price',l:'价格',t:'number'},{k:'unit',l:'价格单位'},{k:'max',l:'每班人数',t:'number'},{k:'hl',l:'亮点'}],teachers:[{k:'name',l:'姓名'},{k:'title',l:'职称'},{k:'spec',l:'擅长'},{k:'exp',l:'教龄'},{k:'edu',l:'学历'},{k:'award',l:'获奖'},{k:'bio',l:'简介',t:'textarea'}],schedules:[{k:'course',l:'课程名'},{k:'day',l:'星期'},{k:'time',l:'时间段'},{k:'teacher',l:'教师'},{k:'campus',l:'校区'},{k:'cur',l:'当前人数',t:'number'},{k:'max',l:'最大人数',t:'number'}],campuses:[{k:'name',l:'校区名'},{k:'addr',l:'地址'},{k:'phone',l:'电话'},{k:'hours',l:'营业时间'},{k:'transport',l:'交通'}],faqs:[{k:'cat',l:'分类'},{k:'q',l:'问题'},{k:'a',l:'答案',t:'textarea'}],promotions:[{k:'title',l:'标题'},{k:'desc',l:'描述'},{k:'value',l:'优惠内容'},{k:'dates',l:'期限'},{k:'cond',l:'条件'}]};
+
+let curTab='courses';
+function renderTabs(){document.getElementById('adminTabs').innerHTML=TABS.map(t=>`<button class="${t.k===curTab?'active':''}" onclick="switchTab('${t.k}')">${t.l}</button>`).join('')}
+
+async function switchTab(k){
+  curTab=k;renderTabs();
+  const el=document.getElementById('adminBody');
+  if(k==='password')return renderPw(el);
+  if(k==='org')return renderOrg(el);
+  const data=await getData();
+  const items=data[k]||[];
+  const fields=FIELDS[k]||[];
+  let html=`<div style="font-weight:600;font-size:13px;margin-bottom:8px">📋 ${TABS.find(t=>t.k===k).l}列表（${items.length}条）</div>`;
+  items.forEach(item=>{
+    html+=`<div class="item-card"><div class="name">${item.name||item.title||item.q||item.course||'#'+item.id}</div>`;
+    html+=`<div class="meta">${fields.filter(f=>!['name','title','q'].includes(f.k)).map(f=>item[f.k]).filter(Boolean).join(' | ')}</div>`;
+    html+=`<div class="acts"><button onclick="delItem('${k}',${item.id})">删除</button></div></div>`;
+  });
+  if(!items.length)html+='<p style="text-align:center;color:var(--gray);padding:20px">暂无数据</p>';
+  html+='<div style="border-top:1px solid var(--border);margin:12px 0;padding-top:12px;font-weight:600;font-size:13px">➕ 添加新数据</div>';
+  fields.forEach(f=>{
+    html+=`<label>${f.l}</label>`;
+    if(f.t==='textarea')html+=`<textarea id="new_${f.k}"></textarea>`;
+    else if(f.t==='number')html+=`<input type="number" id="new_${f.k}">`;
+    else html+=`<input id="new_${f.k}">`;
+  });
+  html+=`<button class="add-btn" onclick="addItem('${k}')">添加</button>`;
+  el.innerHTML=html;
+}
+
+async function renderOrg(el){
+  const data=await getData();
+  const org=data.org||{};
+  const fields=FIELDS.org;
+  let html='<div style="font-weight:600;font-size:13px;margin-bottom:12px">🏫 机构信息</div>';
+  fields.forEach(f=>{
+    html+=`<label>${f.l}</label>`;
+    const val=org[f.k]||'';
+    if(f.t==='textarea')html+=`<textarea id="org_${f.k}">${val}</textarea>`;
+    else html+=`<input id="org_${f.k}" value="${val}">`;
+  });
+  html+='<button class="add-btn" onclick="saveOrg()">保存</button>';
+  el.innerHTML=html;
+}
+
+async function saveOrg(){
+  const data=await getData();
+  if(!data.org)data.org={};
+  FIELDS.org.forEach(f=>{const el=document.getElementById('org_'+f.k);if(el)data.org[f.k]=el.value});
+  await saveDB(data);cachedData=data;alert('✅ 机构信息已保存');
+}
+
+async function addItem(k){
+  const data=await getData();
+  const fields=FIELDS[k]||[];
+  const item={id:Date.now()};
+  fields.forEach(f=>{let v=(document.getElementById('new_'+f.k)||{}).value||'';if(f.t==='number')v=Number(v)||0;item[f.k]=v});
+  if(!item.name&&!item.title&&!item.q&&!item.course)return alert('请填写必要信息');
+  data[k].push(item);await saveDB(data);cachedData=data;
+  alert('✅ 添加成功');switchTab(k);
+}
+
+async function delItem(k,id){
+  if(!confirm('确定删除？'))return;
+  const data=await getData();
+  data[k]=(data[k]||[]).filter(i=>i.id!==id);
+  await saveDB(data);cachedData=data;switchTab(k);
+}
+
+function renderPw(el){
+  el.innerHTML=`<div style="padding:20px 0">
+    <h3 style="margin-bottom:12px">修改管理密码</h3>
+    <label>当前密码</label><input type="password" id="pw_old">
+    <label>新密码</label><input type="password" id="pw_new">
+    <label>确认新密码</label><input type="password" id="pw_cf">
+    <button class="add-btn" onclick="changePw()">修改密码</button>
+    <p style="margin-top:12px;font-size:12px;color:var(--gray)">默认密码：888888</p>
+  </div>`;
+}
+
+function changePw(){
+  const old=document.getElementById('pw_old').value;
+  const nw=document.getElementById('pw_new').value;
+  const cf=document.getElementById('pw_cf').value;
+  if(old!==getPw())return alert('当前密码错误');
+  if(nw.length<4)return alert('新密码至少4位');
+  if(nw!==cf)return alert('两次输入不一致');
+  localStorage.setItem(PW_KEY,nw);alert('✅ 密码修改成功');
+}
+
+document.getElementById('adminMask').addEventListener('click',e=>{if(e.target.id==='adminMask')closeAdmin()});
+
+// ========== 聊天逻辑 ==========
+const M=document.getElementById('msgs');
+const I=document.getElementById('inp');
+const B=document.getElementById('sendBtn');
+let hist=[];
+
+function Q(t){I.value=t;S()}
+
+async function S(){
+  const t=I.value.trim();
+  if(!t)return;
+  addM('user',t);
+  I.value='';I.style.height='auto';
+  B.disabled=true;
+  const ty=addTy();
+
+  // 从数据库构建上下文
+  const data=await getData();
+  cachedData=data;
+  const ctx=buildContext(t,data);
+
+  try{
+    // 直接调用DeepSeek API（国内直连，不翻墙）
+    const DEEPSEEK_KEY='sk-38fdf55b087848e88666ebf76ffe2873';
+    const systemPrompt=`你是"来点墨书法艺术培训中心"的售前AI客服，名叫"小墨"。专业、亲切、耐心，服务咨询课程的家长。以数据库真实数据为准，不编造。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。\n\n${ctx||'（暂无数据）'}`;
+    const msgs=[{role:'system',content:systemPrompt},...hist.slice(-10),{role:'user',content:t}];
+    const r=await fetch('https://api.deepseek.com/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+DEEPSEEK_KEY},
+      body:JSON.stringify({model:'deepseek-chat',messages:msgs,temperature:0.7,max_tokens:500})
+    });
+    const d=await r.json();
+    ty.remove();
+    const reply=d.choices?.[0]?.message?.content;
+    if(reply){
+      addM('bot',reply);
+      hist.push({role:'user',content:t},{role:'assistant',content:reply});
+      if(hist.length>20)hist=hist.slice(-20);
+    }else{
+      addM('bot','抱歉，AI服务暂时不可用，请拨打咨询电话 400-888-6688。');
+    }
+  }catch(e){
+    ty.remove();
+    addM('bot','网络异常，请稍后再试。');
+  }
+  B.disabled=false;
+  I.focus();
+}
+
+function addM(role,text){
+  const d=document.createElement('div');
+  d.className='msg '+(role==='user'?'user':'bot');
+  const av=role==='user'?'我':'墨';
+  d.innerHTML=`<div class="av">${av}</div><div class="bbl">${fmt(text)}</div>`;
+  M.appendChild(d);M.scrollTop=M.scrollHeight;
+}
+
+function addTy(){
+  const d=document.createElement('div');d.className='msg bot';
+  d.innerHTML='<div class="av">墨</div><div class="bbl"><div class="typing"><span></span><span></span><span></span></div></div>';
+  M.appendChild(d);M.scrollTop=M.scrollHeight;return d;
+}
+
+function fmt(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/(\d[\d,]*\.?\d*\s*元[\/期次]*|免费)/g,'<span class="pr">$1</span>').replace(/\n/g,'<br>');}
+
+I.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();S();}});
+I.addEventListener('input',()=>{I.style.height='auto';I.style.height=Math.min(I.scrollHeight,80)+'px';});
+
+// 初始化
+getData().then(async()=>{
+  if(useCloud){
+    document.getElementById('syncBar').className='sync ok';
+    document.getElementById('syncBar').textContent='✅ 云端同步已启用（Gitee）';
+  }else{
+    document.getElementById('syncBar').className='sync err';
+    document.getElementById('syncBar').textContent='📱 本地模式';
+  }
+});
+</script>
+</body>
+</html>
