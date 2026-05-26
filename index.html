@@ -147,6 +147,8 @@ let cachedData = null;
 function defaultData() {
   return {
     org:{name:"来点墨书法艺术培训中心",slogan:"以墨养心，以书育人",intro:"来点墨书法艺术培训中心是一家专注于书法艺术教育的专业培训机构。",phone:"400-888-6688",wechat:"laidianmo_art",philosophy:"书法不仅是技艺的传承，更是心性的修炼。"},
+    aiPersona:{name:"小墨",tone:"专业、亲切、耐心",rule:"以数据库真实数据为准，绝不编造课程、价格、师资等信息。遇到不确定的问题，诚实告知并建议家长拨打咨询电话。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。",forbidden:"不编造任何未在数据中出现的课程、价格、优惠、教师信息。不承诺数据中未注明的服务。不讨论与书法培训无关的话题。"},
+    aiKnowledge:"",
     courses:[
       {id:1,name:"少儿硬笔启蒙班",cat:"硬笔书法",desc:"从握笔姿势到基本笔画，系统培养规范书写习惯。",age:"5-7岁",level:"启蒙",dur:"60分钟/次",sessions:16,price:1280,unit:"元/期",max:12,hl:"趣味教学,握笔矫正,笔画基础,作业辅导"},
       {id:2,name:"少儿硬笔提高班",cat:"硬笔书法",desc:"提升字形结构美感，培养书写速度与质量。",age:"7-10岁",level:"初级",dur:"60分钟/次",sessions:16,price:1480,unit:"元/期",max:12,hl:"结构训练,提速书写,卷面美化,考级辅导"},
@@ -311,7 +313,7 @@ function openAdmin(){document.getElementById('adminMask').classList.add('show');
 function closeAdmin(){document.getElementById('adminMask').classList.remove('show');document.getElementById('adminPanel').classList.remove('show')}
 
 // ========== 管理面板 ==========
-const TABS=[{k:'org',l:'机构'},{k:'courses',l:'课程'},{k:'teachers',l:'教师'},{k:'schedules',l:'课表'},{k:'campuses',l:'校区'},{k:'faqs',l:'FAQ'},{k:'promotions',l:'优惠'},{k:'password',l:'密码'}];
+const TABS=[{k:'org',l:'机构'},{k:'ai',l:'AI设定'},{k:'courses',l:'课程'},{k:'teachers',l:'教师'},{k:'schedules',l:'课表'},{k:'campuses',l:'校区'},{k:'faqs',l:'FAQ'},{k:'promotions',l:'优惠'},{k:'password',l:'密码'}];
 const FIELDS={org:[{k:'name',l:'机构名称'},{k:'slogan',l:'标语'},{k:'intro',l:'简介',t:'textarea'},{k:'phone',l:'咨询电话'},{k:'wechat',l:'微信号'},{k:'philosophy',l:'教学理念',t:'textarea'}],courses:[{k:'name',l:'课程名'},{k:'cat',l:'分类'},{k:'desc',l:'描述',t:'textarea'},{k:'age',l:'适合年龄'},{k:'level',l:'级别'},{k:'dur',l:'课时时长'},{k:'sessions',l:'总课时',t:'number'},{k:'price',l:'价格',t:'number'},{k:'unit',l:'价格单位'},{k:'max',l:'每班人数',t:'number'},{k:'hl',l:'亮点'}],teachers:[{k:'name',l:'姓名'},{k:'title',l:'职称'},{k:'spec',l:'擅长'},{k:'exp',l:'教龄'},{k:'edu',l:'学历'},{k:'award',l:'获奖'},{k:'bio',l:'简介',t:'textarea'}],schedules:[{k:'course',l:'课程名'},{k:'day',l:'星期'},{k:'time',l:'时间段'},{k:'teacher',l:'教师'},{k:'campus',l:'校区'},{k:'cur',l:'当前人数',t:'number'},{k:'max',l:'最大人数',t:'number'}],campuses:[{k:'name',l:'校区名'},{k:'addr',l:'地址'},{k:'phone',l:'电话'},{k:'hours',l:'营业时间'},{k:'transport',l:'交通'}],faqs:[{k:'cat',l:'分类'},{k:'q',l:'问题'},{k:'a',l:'答案',t:'textarea'}],promotions:[{k:'title',l:'标题'},{k:'desc',l:'描述'},{k:'value',l:'优惠内容'},{k:'dates',l:'期限'},{k:'cond',l:'条件'}]};
 
 let curTab='courses';
@@ -322,6 +324,7 @@ async function switchTab(k){
   const el=document.getElementById('adminBody');
   if(k==='password')return renderPw(el);
   if(k==='org')return renderOrg(el);
+  if(k==='ai')return renderAI(el);
   const data=await getData();
   const items=data[k]||[];
   const fields=FIELDS[k]||[];
@@ -363,6 +366,49 @@ async function saveOrg(){
   if(!data.org)data.org={};
   FIELDS.org.forEach(f=>{const el=document.getElementById('org_'+f.k);if(el)data.org[f.k]=el.value});
   await saveDB(data);cachedData=data;alert('✅ 机构信息已保存');
+}
+
+async function renderAI(el){
+  const data=await getData();
+  const ai=data.aiPersona||{};
+  const knowledge=data.aiKnowledge||'';
+  el.innerHTML=`
+  <div style="padding:4px 0">
+    <div style="font-weight:600;font-size:13px;margin-bottom:12px">🤖 AI客服人设设定</div>
+    <p style="font-size:12px;color:var(--gray);margin-bottom:16px;line-height:1.6">设定AI客服的性格、规则和知识，控制其回复内容更准确、减少误编信息。</p>
+
+    <label>AI名称</label>
+    <input id="ai_name" value="${ai.name||'小墨'}" placeholder="AI客服的名字">
+
+    <label>语气风格</label>
+    <input id="ai_tone" value="${ai.tone||''}" placeholder="如：专业、亲切、耐心">
+
+    <label>回复规则 <span style="font-weight:400;color:var(--gray)">(核心指令，AI必须遵守)</span></label>
+    <textarea id="ai_rule" rows="4" placeholder="如：以数据库真实数据为准，绝不编造。不确定时建议家长致电咨询。">${ai.rule||''}</textarea>
+
+    <label>禁止行为 <span style="font-weight:400;color:var(--gray)">(AI绝对不能做的事)</span></label>
+    <textarea id="ai_forbidden" rows="3" placeholder="如：不编造未在数据中的课程和价格。不讨论无关话题。">${ai.forbidden||''}</textarea>
+
+    <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px">
+      <div style="font-weight:600;font-size:13px;margin-bottom:8px">📚 自定义知识库</div>
+      <p style="font-size:12px;color:var(--gray);margin-bottom:12px;line-height:1.6">补充AI需要知道但不在其他栏目中的信息，如：退费政策、补课规则、寒暑假安排、特殊活动等。每条一行。</p>
+      <textarea id="ai_knowledge" rows="8" placeholder="示例：&#10;退费政策：开课前可全额退款，开课后按剩余课时70%退费&#10;补课规则：缺课可跟其他班级补，每期最多补3次&#10;寒暑假：每年1-2月、7-8月有暑期班和寒假班，课时另算&#10;体验课：新学员可免费体验1次，需提前1天预约">${knowledge}</textarea>
+    </div>
+
+    <button class="add-btn" onclick="saveAI()">保存AI设定</button>
+  </div>`;
+}
+
+async function saveAI(){
+  const data=await getData();
+  data.aiPersona={
+    name:document.getElementById('ai_name').value||'小墨',
+    tone:document.getElementById('ai_tone').value,
+    rule:document.getElementById('ai_rule').value,
+    forbidden:document.getElementById('ai_forbidden').value
+  };
+  data.aiKnowledge=document.getElementById('ai_knowledge').value;
+  await saveDB(data);cachedData=data;alert('✅ AI设定已保存');
 }
 
 async function addItem(k){
@@ -429,7 +475,13 @@ async function S(){
   try{
     // 直接调用DeepSeek API（国内直连，不翻墙）
     const DEEPSEEK_KEY='sk-38fdf55b087848e88666ebf76ffe2873';
-    const systemPrompt=`你是"来点墨书法艺术培训中心"的售前AI客服，名叫"小墨"。专业、亲切、耐心，服务咨询课程的家长。以数据库真实数据为准，不编造。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。\n\n${ctx||'（暂无数据）'}`;
+    const ai=data.aiPersona||{};
+    const aiName=ai.name||'小墨';
+    const aiTone=ai.tone||'专业、亲切、耐心';
+    const aiRule=ai.rule||'以数据库真实数据为准，不编造。';
+    const aiForbidden=ai.forbidden||'';
+    const aiKnowledge=data.aiKnowledge||'';
+    let systemPrompt=`你是"${data.org?.name||'来点墨书法艺术培训中心'}"的售前AI客服，名叫"${aiName}"。\n\n【人设】语气风格：${aiTone}\n\n【必须遵守的规则】\n${aiRule}${aiForbidden?'\n\n【绝对禁止】\n'+aiForbidden:''}${aiKnowledge?'\n\n【补充知识库】\n'+aiKnowledge:''}\n\n【机构数据】\n${ctx||'（暂无数据）'}`;
     const msgs=[{role:'system',content:systemPrompt},...hist.slice(-10),{role:'user',content:t}];
     const r=await fetch('https://api.deepseek.com/chat/completions',{
       method:'POST',
