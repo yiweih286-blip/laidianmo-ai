@@ -118,6 +118,9 @@ body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;backgro
   </div>
 </div>
 
+<!-- 全局隐藏的文件选择器 -->
+<input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarFile(this)">
+
 <!-- 密码弹窗 -->
 <div class="mask" id="pwMask" style="z-index:10001"></div>
 <div class="pw-dialog" id="pwDialog" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10002;background:#fff;border-radius:12px;padding:24px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
@@ -415,9 +418,8 @@ async function renderAI(el){
     <label>AI头像图片 <span style="font-weight:400;color:var(--gray)">(从相册选取)</span></label>
     <div class="avatar-upload">
       <div class="avatar-preview" id="avatarPreview">${ai.avatarImg?`<img src="${ai.avatarImg}">`:(ai.avatar||'墨')}</div>
-      <label for="avatarFile" class="avatar-upload-btn">📷 从相册选取</label>
-      <button class="avatar-upload-btn" onclick="clearAvatarImg()" style="color:var(--red)">✕ 清除</button>
-      <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarFile(this)">
+      <div class="avatar-upload-btn" onclick="pickAvatar()">📷 从相册选取</div>
+      <div class="avatar-upload-btn" onclick="clearAvatarImg()" style="color:var(--red)">✕ 清除</div>
     </div>
 
     <label>语气风格</label>
@@ -440,6 +442,12 @@ async function renderAI(el){
 }
 
 let _pendingAvatarImg='';
+
+function pickAvatar(){
+  const f=document.getElementById('avatarFile');
+  f.value='';
+  f.click();
+}
 
 function handleAvatarFile(input){
   const file=input.files[0];
