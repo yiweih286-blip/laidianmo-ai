@@ -75,18 +75,18 @@ body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;b
 <body>
 <div class="app">
   <div class="hdr" id="hdr">
-    <div class="seal">墨</div>
+    <div class="seal" id="hdrSeal">墨</div>
     <div class="info">
-      <h1>来点墨书法艺术培训中心</h1>
-      <p><span class="dot"></span>小墨在线 · AI智能客服</p>
+      <h1 id="hdrName">来点墨书法艺术培训中心</h1>
+      <p><span class="dot"></span><span id="hdrStatus">小墨在线 · AI智能客服</span></p>
     </div>
   </div>
   <div class="sync load" id="syncBar">⏳ 连接中...</div>
   <div class="msgs" id="msgs">
-    <div class="msg bot">
-      <div class="av">墨</div>
+    <div class="msg bot" id="welcomeMsg">
+      <div class="av" id="welcomeAv">墨</div>
       <div class="bbl">
-        <p>您好！我是小墨，来点墨书法艺术培训中心的AI智能顾问 🎨</p>
+        <p id="welcomeText">您好！我是小墨，来点墨书法艺术培训中心的AI智能顾问 🎨</p>
         <p style="margin-top:6px">很高兴为您解答关于书法课程的任何问题！</p>
         <div class="tags">
           <button onclick="Q('有哪些课程？')">📚 课程介绍</button>
@@ -147,7 +147,7 @@ let cachedData = null;
 function defaultData() {
   return {
     org:{name:"来点墨书法艺术培训中心",slogan:"以墨养心，以书育人",intro:"来点墨书法艺术培训中心是一家专注于书法艺术教育的专业培训机构。",phone:"400-888-6688",wechat:"laidianmo_art",philosophy:"书法不仅是技艺的传承，更是心性的修炼。"},
-    aiPersona:{name:"小墨",tone:"专业、亲切、耐心",rule:"以数据库真实数据为准，绝不编造课程、价格、师资等信息。遇到不确定的问题，诚实告知并建议家长拨打咨询电话。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。",forbidden:"不编造任何未在数据中出现的课程、价格、优惠、教师信息。不承诺数据中未注明的服务。不讨论与书法培训无关的话题。"},
+    aiPersona:{name:"小墨",avatar:"墨",tone:"专业、亲切、耐心",rule:"以数据库真实数据为准，绝不编造课程、价格、师资等信息。遇到不确定的问题，诚实告知并建议家长拨打咨询电话。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。",forbidden:"不编造任何未在数据中出现的课程、价格、优惠、教师信息。不承诺数据中未注明的服务。不讨论与书法培训无关的话题。"},
     aiKnowledge:"",
     courses:[
       {id:1,name:"少儿硬笔启蒙班",cat:"硬笔书法",desc:"从握笔姿势到基本笔画，系统培养规范书写习惯。",age:"5-7岁",level:"启蒙",dur:"60分钟/次",sessions:16,price:1280,unit:"元/期",max:12,hl:"趣味教学,握笔矫正,笔画基础,作业辅导"},
@@ -380,6 +380,9 @@ async function renderAI(el){
     <label>AI名称</label>
     <input id="ai_name" value="${ai.name||'小墨'}" placeholder="AI客服的名字">
 
+    <label>AI头像 <span style="font-weight:400;color:var(--gray)">(1-2个字，显示在聊天气泡和标题栏)</span></label>
+    <input id="ai_avatar" value="${ai.avatar||'墨'}" placeholder="如：墨、AI、💬" maxlength="2">
+
     <label>语气风格</label>
     <input id="ai_tone" value="${ai.tone||''}" placeholder="如：专业、亲切、耐心">
 
@@ -403,12 +406,20 @@ async function saveAI(){
   const data=await getData();
   data.aiPersona={
     name:document.getElementById('ai_name').value||'小墨',
+    avatar:document.getElementById('ai_avatar').value||'墨',
     tone:document.getElementById('ai_tone').value,
     rule:document.getElementById('ai_rule').value,
     forbidden:document.getElementById('ai_forbidden').value
   };
   data.aiKnowledge=document.getElementById('ai_knowledge').value;
-  await saveDB(data);cachedData=data;alert('✅ AI设定已保存');
+  await saveDB(data);cachedData=data;
+  // 立即更新界面
+  const ai=data.aiPersona;
+  document.getElementById('hdrSeal').textContent=ai.avatar||'墨';
+  document.getElementById('hdrStatus').textContent=(ai.name||'小墨')+'在线 · AI智能客服';
+  document.getElementById('welcomeAv').textContent=ai.avatar||'墨';
+  document.getElementById('welcomeText').textContent=`您好！我是${ai.name||'小墨'}，${data.org?.name||'来点墨书法艺术培训中心'}的AI智能顾问 🎨`;
+  alert('✅ AI设定已保存');
 }
 
 async function addItem(k){
@@ -506,17 +517,18 @@ async function S(){
   I.focus();
 }
 
+function getBotAv(){const d=cachedData;return d?.aiPersona?.avatar||'墨'}
 function addM(role,text){
   const d=document.createElement('div');
   d.className='msg '+(role==='user'?'user':'bot');
-  const av=role==='user'?'我':'墨';
+  const av=role==='user'?'我':getBotAv();
   d.innerHTML=`<div class="av">${av}</div><div class="bbl">${fmt(text)}</div>`;
   M.appendChild(d);M.scrollTop=M.scrollHeight;
 }
 
 function addTy(){
   const d=document.createElement('div');d.className='msg bot';
-  d.innerHTML='<div class="av">墨</div><div class="bbl"><div class="typing"><span></span><span></span><span></span></div></div>';
+  d.innerHTML=`<div class="av">${getBotAv()}</div><div class="bbl"><div class="typing"><span></span><span></span><span></span></div></div>`;
   M.appendChild(d);M.scrollTop=M.scrollHeight;return d;
 }
 
@@ -527,6 +539,19 @@ I.addEventListener('input',()=>{I.style.height='auto';I.style.height=Math.min(I.
 
 // 初始化
 getData().then(async()=>{
+  const data=cachedData;
+  // 更新界面显示
+  if(data){
+    const ai=data.aiPersona||{};
+    const org=data.org||{};
+    // 头部
+    document.getElementById('hdrSeal').textContent=ai.avatar||'墨';
+    document.getElementById('hdrName').textContent=org.name||'来点墨书法艺术培训中心';
+    document.getElementById('hdrStatus').textContent=(ai.name||'小墨')+'在线 · AI智能客服';
+    // 欢迎语
+    document.getElementById('welcomeAv').textContent=ai.avatar||'墨';
+    document.getElementById('welcomeText').textContent=`您好！我是${ai.name||'小墨'}，${org.name||'来点墨书法艺术培训中心'}的AI智能顾问 🎨`;
+  }
   if(useCloud){
     document.getElementById('syncBar').className='sync ok';
     document.getElementById('syncBar').textContent='✅ 云端同步已启用（Gitee）';
