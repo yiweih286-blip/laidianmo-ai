@@ -11,7 +11,8 @@ html,body{height:100%;-webkit-tap-highlight-color:transparent;overflow:auto;-web
 body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;background:var(--paper);color:var(--ink)}
 .app{display:flex;flex-direction:column;height:100vh;max-width:500px;margin:0 auto;background:var(--paper-l)}
 .hdr{background:linear-gradient(135deg,#2c2c2c,#5c3a21);color:#f5f0e8;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;user-select:none}
-.hdr .seal{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+.hdr .seal{width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;overflow:hidden}
+.hdr .seal img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .hdr .info{flex:1}
 .hdr .info h1{font-size:14px;font-weight:600}
 .hdr .info p{font-size:10px;opacity:.7;margin-top:1px}
@@ -23,7 +24,8 @@ body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;b
 .msgs{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .msg{display:flex;gap:8px;margin-bottom:12px;animation:fu .3s ease}
 .msg.user{flex-direction:row-reverse}
-.msg .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.msg .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;overflow:hidden}
+.msg .av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .msg.bot .av{background:var(--red);color:#fff}
 .msg.user .av{background:var(--brown);color:#fff}
 .msg .bbl{max-width:78%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.6;word-break:break-word}
@@ -147,7 +149,7 @@ let cachedData = null;
 function defaultData() {
   return {
     org:{name:"来点墨书法艺术培训中心",slogan:"以墨养心，以书育人",intro:"来点墨书法艺术培训中心是一家专注于书法艺术教育的专业培训机构。",phone:"400-888-6688",wechat:"laidianmo_art",philosophy:"书法不仅是技艺的传承，更是心性的修炼。"},
-    aiPersona:{name:"小墨",avatar:"墨",tone:"专业、亲切、耐心",rule:"以数据库真实数据为准，绝不编造课程、价格、师资等信息。遇到不确定的问题，诚实告知并建议家长拨打咨询电话。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。",forbidden:"不编造任何未在数据中出现的课程、价格、优惠、教师信息。不承诺数据中未注明的服务。不讨论与书法培训无关的话题。"},
+    aiPersona:{name:"小墨",avatar:"墨",avatarImg:"",title:"来点墨书法艺术培训中心",tone:"专业、亲切、耐心",rule:"以数据库真实数据为准，绝不编造课程、价格、师资等信息。遇到不确定的问题，诚实告知并建议家长拨打咨询电话。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。",forbidden:"不编造任何未在数据中出现的课程、价格、优惠、教师信息。不承诺数据中未注明的服务。不讨论与书法培训无关的话题。"},
     aiKnowledge:"",
     courses:[
       {id:1,name:"少儿硬笔启蒙班",cat:"硬笔书法",desc:"从握笔姿势到基本笔画，系统培养规范书写习惯。",age:"5-7岁",level:"启蒙",dur:"60分钟/次",sessions:16,price:1280,unit:"元/期",max:12,hl:"趣味教学,握笔矫正,笔画基础,作业辅导"},
@@ -256,7 +258,23 @@ async function saveDB(data){
   }
 }
 
-async function getData(){if(!cachedData)cachedData=await loadDB();return cachedData}
+async function getData(){
+  if(!cachedData)cachedData=await loadDB();
+  // 数据迁移：确保新字段存在
+  if(cachedData){
+    if(!cachedData.aiPersona)cachedData.aiPersona={};
+    const ai=cachedData.aiPersona;
+    if(!ai.name)ai.name='小墨';
+    if(!ai.avatar)ai.avatar='墨';
+    if(ai.avatarImg===undefined)ai.avatarImg='';
+    if(!ai.title)ai.title=cachedData.org?.name||'来点墨书法艺术培训中心';
+    if(!ai.tone)ai.tone='专业、亲切、耐心';
+    if(!ai.rule)ai.rule='以数据库真实数据为准，绝不编造课程、价格、师资等信息。遇到不确定的问题，诚实告知并建议家长拨打咨询电话。语气温暖自然，适时推荐体验课。简体中文，简洁有力，价格明确标注。';
+    if(!ai.forbidden)ai.forbidden='不编造任何未在数据中出现的课程、价格、优惠、教师信息。不承诺数据中未注明的服务。不讨论与书法培训无关的话题。';
+    if(cachedData.aiKnowledge===undefined)cachedData.aiKnowledge='';
+  }
+  return cachedData;
+}
 
 // ========== 智能检索 ==========
 const KW={价格:['价格','费用','多少钱','收费','学费','优惠','折扣'],课程:['课程','班','课','学什么','教什么','内容','科目'],时间:['时间','什么时候','几点','课表','排课','周末','平时'],老师:['老师','教师','师资','谁教','教学'],年龄:['年龄','几岁','多大','适合','少儿','成人','小孩'],报名:['报名','怎么报','试听','体验','预约'],地址:['地址','在哪','位置','校区','怎么去','交通'],硬笔:['硬笔','铅笔','钢笔','写字'],毛笔:['毛笔','软笔','楷书','行书','草书'],国画:['国画','水墨','花鸟','山水'],篆刻:['篆刻','印章']};
@@ -377,11 +395,18 @@ async function renderAI(el){
     <div style="font-weight:600;font-size:13px;margin-bottom:12px">🤖 AI客服人设设定</div>
     <p style="font-size:12px;color:var(--gray);margin-bottom:16px;line-height:1.6">设定AI客服的性格、规则和知识，控制其回复内容更准确、减少误编信息。</p>
 
+    <label>界面标题 <span style="font-weight:400;color:var(--gray)">(显示在聊天界面顶部)</span></label>
+    <input id="ai_title" value="${ai.title||org.name||'来点墨书法艺术培训中心'}" placeholder="如：来点墨书法艺术培训中心">
+
     <label>AI名称</label>
     <input id="ai_name" value="${ai.name||'小墨'}" placeholder="AI客服的名字">
 
-    <label>AI头像 <span style="font-weight:400;color:var(--gray)">(1-2个字，显示在聊天气泡和标题栏)</span></label>
+    <label>AI头像文字 <span style="font-weight:400;color:var(--gray)">(1-2个字，无图片时显示)</span></label>
     <input id="ai_avatar" value="${ai.avatar||'墨'}" placeholder="如：墨、AI、💬" maxlength="2">
+
+    <label>AI头像图片 <span style="font-weight:400;color:var(--gray)">(填图片URL，优先于文字显示)</span></label>
+    <input id="ai_avatarImg" value="${ai.avatarImg||''}" placeholder="粘贴图片链接，如 https://xxx.com/logo.png">
+    ${ai.avatarImg?`<div style="margin:6px 0;text-align:center"><img src="${ai.avatarImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.style.display='none'"></div>`:''}
 
     <label>语气风格</label>
     <input id="ai_tone" value="${ai.tone||''}" placeholder="如：专业、亲切、耐心">
@@ -405,8 +430,10 @@ async function renderAI(el){
 async function saveAI(){
   const data=await getData();
   data.aiPersona={
+    title:document.getElementById('ai_title').value||data.org?.name||'来点墨书法艺术培训中心',
     name:document.getElementById('ai_name').value||'小墨',
     avatar:document.getElementById('ai_avatar').value||'墨',
+    avatarImg:document.getElementById('ai_avatarImg').value||'',
     tone:document.getElementById('ai_tone').value,
     rule:document.getElementById('ai_rule').value,
     forbidden:document.getElementById('ai_forbidden').value
@@ -414,12 +441,26 @@ async function saveAI(){
   data.aiKnowledge=document.getElementById('ai_knowledge').value;
   await saveDB(data);cachedData=data;
   // 立即更新界面
-  const ai=data.aiPersona;
-  document.getElementById('hdrSeal').textContent=ai.avatar||'墨';
-  document.getElementById('hdrStatus').textContent=(ai.name||'小墨')+'在线 · AI智能客服';
-  document.getElementById('welcomeAv').textContent=ai.avatar||'墨';
-  document.getElementById('welcomeText').textContent=`您好！我是${ai.name||'小墨'}，${data.org?.name||'来点墨书法艺术培训中心'}的AI智能顾问 🎨`;
+  updateUI(data);
   alert('✅ AI设定已保存');
+}
+
+function updateUI(data){
+  const ai=data.aiPersona||{};
+  const org=data.org||{};
+  const title=ai.title||org.name||'来点墨书法艺术培训中心';
+  // 标题栏
+  document.getElementById('hdrName').textContent=title;
+  document.getElementById('hdrStatus').textContent=(ai.name||'小墨')+'在线 · AI智能客服';
+  // 头像
+  const seal=document.getElementById('hdrSeal');
+  if(ai.avatarImg){seal.innerHTML=`<img src="${ai.avatarImg}" onerror="this.parentElement.textContent='${ai.avatar||'墨'}'">`}
+  else{seal.textContent=ai.avatar||'墨'}
+  // 欢迎语
+  const wav=document.getElementById('welcomeAv');
+  if(ai.avatarImg){wav.innerHTML=`<img src="${ai.avatarImg}" onerror="this.parentElement.textContent='${ai.avatar||'墨'}'">`}
+  else{wav.textContent=ai.avatar||'墨'}
+  document.getElementById('welcomeText').textContent=`您好！我是${ai.name||'小墨'}，${title}的AI智能顾问 🎨`;
 }
 
 async function addItem(k){
@@ -517,18 +558,23 @@ async function S(){
   I.focus();
 }
 
-function getBotAv(){const d=cachedData;return d?.aiPersona?.avatar||'墨'}
+function getBotAvHTML(){
+  const d=cachedData;
+  const ai=d?.aiPersona||{};
+  if(ai.avatarImg) return `<img src="${ai.avatarImg}" onerror="this.parentElement.textContent='${ai.avatar||'墨'}'">`;
+  return ai.avatar||'墨';
+}
 function addM(role,text){
   const d=document.createElement('div');
   d.className='msg '+(role==='user'?'user':'bot');
-  const av=role==='user'?'我':getBotAv();
+  const av=role==='user'?'我':getBotAvHTML();
   d.innerHTML=`<div class="av">${av}</div><div class="bbl">${fmt(text)}</div>`;
   M.appendChild(d);M.scrollTop=M.scrollHeight;
 }
 
 function addTy(){
   const d=document.createElement('div');d.className='msg bot';
-  d.innerHTML=`<div class="av">${getBotAv()}</div><div class="bbl"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  d.innerHTML=`<div class="av">${getBotAvHTML()}</div><div class="bbl"><div class="typing"><span></span><span></span><span></span></div></div>`;
   M.appendChild(d);M.scrollTop=M.scrollHeight;return d;
 }
 
@@ -540,18 +586,7 @@ I.addEventListener('input',()=>{I.style.height='auto';I.style.height=Math.min(I.
 // 初始化
 getData().then(async()=>{
   const data=cachedData;
-  // 更新界面显示
-  if(data){
-    const ai=data.aiPersona||{};
-    const org=data.org||{};
-    // 头部
-    document.getElementById('hdrSeal').textContent=ai.avatar||'墨';
-    document.getElementById('hdrName').textContent=org.name||'来点墨书法艺术培训中心';
-    document.getElementById('hdrStatus').textContent=(ai.name||'小墨')+'在线 · AI智能客服';
-    // 欢迎语
-    document.getElementById('welcomeAv').textContent=ai.avatar||'墨';
-    document.getElementById('welcomeText').textContent=`您好！我是${ai.name||'小墨'}，${org.name||'来点墨书法艺术培训中心'}的AI智能顾问 🎨`;
-  }
+  if(data) updateUI(data);
   if(useCloud){
     document.getElementById('syncBar').className='sync ok';
     document.getElementById('syncBar').textContent='✅ 云端同步已启用（Gitee）';
