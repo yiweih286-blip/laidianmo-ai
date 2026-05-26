@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>来点墨书法艺术培训中心</title>
-<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4/dist/av-min.js"></script>
 <style>
 :root{--ink:#1a1a1a;--brown:#5c3a21;--brown-l:#8B4513;--gold:#c8a45c;--paper:#f5f0e8;--paper-l:#faf7f2;--white:#fefdfb;--red:#c23a2b;--green:#2d8a4e;--gray:#666;--gray-l:#999;--border:#e0d8c8}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -118,20 +117,15 @@ body{font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;b
 </div>
 
 <script>
-// ========== LeanCloud 配置 ==========
-const LC_CONFIG = {
-  appId: '',        // 填入你的 LeanCloud AppID
-  appKey: '',       // 填入你的 LeanCloud AppKey
-  serverURL: ''     // 填入你的 LeanCloud REST API 服务器地址
+// ========== Gitee 云存储配置 ==========
+const GITEE_CONFIG = {
+  token: '647c383bd51200fbc516d76266fcf19e',
+  owner: 'lin041006',
+  repo: 'laidianmo',
+  branch: 'master',
+  file: 'data.json'
 };
-
-let useLC = false;
-try {
-  if (LC_CONFIG.appId) {
-    AV.init(LC_CONFIG);
-    useLC = true;
-  }
-} catch(e) { console.error('LeanCloud init error:', e); }
+let useCloud = true;
 
 const PW_KEY = 'laidianmo_pw';
 const DB_KEY = 'laidianmo_db';
@@ -194,33 +188,58 @@ function defaultData() {
   };
 }
 
-// ========== 数据读写 ==========
+// ========== 数据读写（Gitee云 + 本地缓存） ==========
 function getLocalDB(){try{return JSON.parse(localStorage.getItem(DB_KEY))}catch{return null}}
 function saveLocalDB(d){localStorage.setItem(DB_KEY,JSON.stringify(d))}
 
 async function loadDB(){
-  if(useLC){
+  // 优先从Gitee云端加载
+  if(useCloud){
     try{
-      const q=new AV.Query('AppData');
-      q.equalTo('key','main');
-      const r=await q.first();
-      if(r) return r.get('data');
-    }catch(e){console.error('LC load:',e)}
+      const url=`https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/contents/${GITEE_CONFIG.file}?ref=${GITEE_CONFIG.branch}&access_token=${GITEE_CONFIG.token}`;
+      const r=await fetch(url);
+      if(r.ok){
+        const d=await r.json();
+        if(d.content){
+          const data=JSON.parse(atob(d.content));
+          // 缓存到本地
+          saveLocalDB(data);
+          // 记录SHA用于后续更新
+          GITEE_CONFIG._sha=d.sha;
+          return data;
+        }
+      }
+    }catch(e){console.error('Gitee load:',e)}
   }
   return getLocalDB()||defaultData();
 }
 
 async function saveDB(data){
+  // 保存到本地
   saveLocalDB(data);
-  if(useLC){
+  // 保存到Gitee云端
+  if(useCloud){
     try{
-      const q=new AV.Query('AppData');
-      q.equalTo('key','main');
-      let r=await q.first();
-      if(!r){r=new AV.Object('AppData');r.set('key','main')}
-      r.set('data',data);
-      await r.save();
-    }catch(e){console.error('LC save:',e)}
+      const url=`https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/contents/${GITEE_CONFIG.file}`;
+      const body={
+        access_token:GITEE_CONFIG.token,
+        content:btoa(unescape(encodeURIComponent(JSON.stringify(data)))),
+        message:'更新数据',
+        branch:GITEE_CONFIG.branch
+      };
+      // 如果有SHA，说明文件已存在，用PUT更新
+      if(GITEE_CONFIG._sha){
+        body.sha=GITEE_CONFIG._sha;
+        const r=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const d=await r.json();
+        if(d.content) GITEE_CONFIG._sha=d.content.sha;
+      }else{
+        // 首次创建
+        const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const d=await r.json();
+        if(d.content) GITEE_CONFIG._sha=d.content.sha;
+      }
+    }catch(e){console.error('Gitee save:',e)}
   }
 }
 
@@ -429,16 +448,12 @@ I.addEventListener('input',()=>{I.style.height='auto';I.style.height=Math.min(I.
 
 // 初始化
 getData().then(async()=>{
-  if(useLC){
-    const q=new AV.Query('AppData');
-    q.equalTo('key','main');
-    const r=await q.first();
-    if(!r){await saveDB(defaultData());cachedData=defaultData()}
+  if(useCloud){
     document.getElementById('syncBar').className='sync ok';
-    document.getElementById('syncBar').textContent='✅ 云端同步已启用';
+    document.getElementById('syncBar').textContent='✅ 云端同步已启用（Gitee）';
   }else{
     document.getElementById('syncBar').className='sync err';
-    document.getElementById('syncBar').textContent='📱 本地模式（配置LeanCloud可多设备同步）';
+    document.getElementById('syncBar').textContent='📱 本地模式';
   }
 });
 </script>
