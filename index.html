@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>来点墨书法艺术培训中心</title>
 <style>
-:root{--ink:#1a1a1a;--ink-l:#3d3d3d;--brown:#5c3a21;--brown-l:#8B4513;--gold:#c8a45c;--gold-l:#e8d5a3;--paper:#f5f0e8;--paper-l:#faf7f2;--white:#fefdfb;--red:#b5342a;--red-l:#d4605a;--green:#4a7c59;--gray:#666;--gray-l:#999;--border:#d8cdb8;--seal-red:#c23a2b}
+:root{--ink:#111;--ink-l:#333;--brown:#222;--brown-l:#444;--gold:#888;--gold-l:#ccc;--paper:#f7f7f5;--paper-l:#fcfcfa;--white:#fff;--red:#c23a2b;--red-l:#e05545;--green:#3a7d44;--gray:#666;--gray-l:#999;--border:#ddd;--seal-red:#c23a2b}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;-webkit-tap-highlight-color:transparent;overflow:auto;-webkit-overflow-scrolling:touch}
 body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;background:var(--paper);color:var(--ink)}
 .app{display:flex;flex-direction:column;height:100vh;max-width:500px;margin:0 auto;background:var(--paper-l);position:relative}
 .app::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
 .app>*{position:relative;z-index:1}
-.hdr{background:linear-gradient(160deg,#1a1a1a 0%,#2c1810 40%,#5c3a21 100%);color:#f5f0e8;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;user-select:none;position:relative;overflow:hidden}
-.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.hdr .seal{width:38px;height:38px;border-radius:50%;background:var(--seal-red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden;border:2px solid rgba(200,164,92,.4);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hdr{background:linear-gradient(160deg,#111 0%,#1a1a1a 40%,#222 100%);color:#f5f5f5;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;user-select:none;position:relative;overflow:hidden}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#666,transparent)}
+.hdr .seal{width:38px;height:38px;border-radius:50%;background:var(--seal-red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;overflow:hidden;border:2px solid rgba(255,255,255,.15);box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .hdr .seal img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .hdr .info{flex:1}
 .hdr .info h1{font-size:15px;font-weight:600;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,.3)}
@@ -29,17 +29,17 @@ body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;backgro
 .msg.user{flex-direction:row-reverse}
 .msg .av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;overflow:hidden}
 .msg .av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.msg.bot .av{background:var(--seal-red);color:#fff;box-shadow:0 2px 6px rgba(194,58,43,.3)}
-.msg.user .av{background:var(--brown);color:#fff;box-shadow:0 2px 6px rgba(92,58,33,.3)}
+.msg.bot .av{background:var(--seal-red);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.msg.user .av{background:#222;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .msg .bbl{max-width:78%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.7;word-break:break-word}
-.msg.bot .bbl{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px;box-shadow:0 1px 4px rgba(92,58,33,.08)}
-.msg.user .bbl{background:linear-gradient(135deg,var(--brown),var(--brown-l));color:#f5f0e8;border-top-right-radius:4px;box-shadow:0 2px 6px rgba(92,58,33,.2)}
+.msg.bot .bbl{background:var(--white);border:1px solid var(--border);border-top-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.msg.user .bbl{background:#222;color:#f5f5f5;border-top-right-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .msg .bbl .pr{color:var(--red);font-weight:600}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .tags button{padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--white);color:var(--brown);font-size:12px;cursor:pointer;transition:all .2s}
 .tags button:active{background:var(--brown);color:#fff;border-color:var(--brown)}
 .typing{display:flex;gap:4px;padding:4px 0}
-.typing span{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:ty 1.4s infinite}
+.typing span{width:7px;height:7px;background:#999;border-radius:50%;animation:ty 1.4s infinite}
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
 @keyframes ty{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
@@ -47,8 +47,8 @@ body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;backgro
 .ftr{padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;background:var(--paper-l)}
 .ftr .iw{display:flex;gap:8px;align-items:flex-end}
 .ftr textarea{flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:20px;font-size:14px;outline:none;resize:none;max-height:80px;background:var(--white);font-family:inherit}
-.ftr textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,164,92,.2)}
-.ftr button{width:38px;height:38px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--brown),var(--brown-l));color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(92,58,33,.3)}
+.ftr textarea:focus{border-color:#333;box-shadow:0 0 0 2px rgba(0,0,0,.08)}
+.ftr button{width:38px;height:38px;border-radius:50%;border:none;background:#222;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .ftr button:disabled{opacity:.5}
 .ftr button svg{width:18px;height:18px}
 .hint{font-size:10px;color:var(--gray-l);text-align:center;margin-top:4px;letter-spacing:.5px}
@@ -58,28 +58,28 @@ body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;backgro
 .mask.show{display:block}
 .admin{position:fixed;inset:0;z-index:101;display:none;flex-direction:column;background:var(--paper-l)}
 .admin.show{display:flex}
-.admin-hdr{background:linear-gradient(135deg,#1a1a1a,#5c3a21);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.admin-hdr{background:#111;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .admin-hdr h2{font-size:15px;letter-spacing:1px}
 .admin-hdr button{border:none;background:none;font-size:20px;color:#fff;cursor:pointer;padding:4px 8px}
 .admin-tabs{display:flex;overflow-x:auto;padding:8px 12px;gap:6px;border-bottom:1px solid var(--border);flex-shrink:0;-webkit-overflow-scrolling:touch}
 .admin-tabs button{padding:6px 12px;border-radius:14px;border:1px solid var(--border);background:var(--white);color:var(--ink);font-size:12px;white-space:nowrap;cursor:pointer;transition:all .2s}
-.admin-tabs button.active{background:var(--brown);color:#fff;border-color:var(--brown)}
+.admin-tabs button.active{background:#222;color:#fff;border-color:#222}
 .admin-body{flex:1;overflow-y:auto;padding:12px 16px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .admin-body label{display:block;font-size:12px;color:var(--gray);margin:8px 0 3px}
 .admin-body input,.admin-body textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:var(--paper-l);font-family:inherit}
-.admin-body input:focus,.admin-body textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,164,92,.2)}
+.admin-body input:focus,.admin-body textarea:focus{border-color:#333;box-shadow:0 0 0 2px rgba(0,0,0,.08)}
 .admin-body textarea{min-height:60px;resize:vertical}
-.add-btn{width:100%;padding:10px;border:none;border-radius:8px;background:linear-gradient(135deg,var(--brown),var(--brown-l));color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;letter-spacing:1px;box-shadow:0 2px 6px rgba(92,58,33,.3)}
-.item-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(92,58,33,.06)}
+.add-btn{width:100%;padding:10px;border:none;border-radius:8px;background:#222;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;letter-spacing:1px;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.item-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .item-card .name{font-weight:600;font-size:13px}
 .item-card .meta{font-size:11px;color:var(--gray);margin-top:4px}
 .item-card .acts{margin-top:6px;display:flex;gap:6px}
 .item-card .acts button{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);color:var(--red);font-size:11px;cursor:pointer}
 .avatar-upload{display:flex;align-items:center;gap:12px;margin:6px 0}
-.avatar-preview{width:48px;height:48px;border-radius:50%;background:var(--seal-red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;overflow:hidden;border:2px solid var(--gold-l);flex-shrink:0}
+.avatar-preview{width:48px;height:48px;border-radius:50%;background:var(--seal-red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;overflow:hidden;border:2px solid #ddd;flex-shrink:0}
 .avatar-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-.avatar-upload-btn{padding:6px 14px;border-radius:8px;border:1px dashed var(--gold);background:var(--white);color:var(--brown);font-size:12px;cursor:pointer}
-.avatar-upload-btn:active{background:var(--gold-l)}
+.avatar-upload-btn{padding:6px 14px;border-radius:8px;border:1px dashed #999;background:var(--white);color:#333;font-size:12px;cursor:pointer}
+.avatar-upload-btn:active{background:#eee}
 </style>
 </head>
 <body>
