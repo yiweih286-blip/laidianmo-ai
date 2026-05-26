@@ -214,7 +214,7 @@ async function loadDB(){
       if(r.ok){
         const d=await r.json();
         if(d.content){
-          const data=JSON.parse(atob(d.content));
+          const data=JSON.parse(decodeURIComponent(escape(atob(d.content))));
           // 缓存到本地
           saveLocalDB(data);
           // 记录SHA用于后续更新
