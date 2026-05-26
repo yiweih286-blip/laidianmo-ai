@@ -415,7 +415,7 @@ async function renderAI(el){
     <label>AI头像图片 <span style="font-weight:400;color:var(--gray)">(从相册选取)</span></label>
     <div class="avatar-upload">
       <div class="avatar-preview" id="avatarPreview">${ai.avatarImg?`<img src="${ai.avatarImg}">`:(ai.avatar||'墨')}</div>
-      <button class="avatar-upload-btn" onclick="document.getElementById('avatarFile').click()">📷 从相册选取</button>
+      <label for="avatarFile" class="avatar-upload-btn">📷 从相册选取</label>
       <button class="avatar-upload-btn" onclick="clearAvatarImg()" style="color:var(--red)">✕ 清除</button>
       <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatarFile(this)">
     </div>
