@@ -74,7 +74,9 @@ body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;backgro
 .item-card .name{font-weight:600;font-size:13px}
 .item-card .meta{font-size:11px;color:var(--gray);margin-top:4px}
 .item-card .acts{margin-top:6px;display:flex;gap:6px}
-.item-card .acts button{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);color:var(--red);font-size:11px;cursor:pointer}
+.item-card .acts button{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-size:11px;cursor:pointer}
+.item-card .acts button.btn-edit{color:var(--accent)}
+.item-card .acts button.btn-del{color:var(--red)}
 .avatar-upload{display:flex;align-items:center;gap:12px;margin:6px 0}
 .avatar-preview{width:48px;height:48px;border-radius:50%;background:var(--seal-red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;overflow:hidden;border:2px solid #ddd;flex-shrink:0}
 .avatar-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
@@ -270,6 +272,11 @@ async function saveDB(data){
   // 保存到Gitee云端
   if(useCloud){
     try{
+      // 先获取最新SHA，避免SHA过期导致保存失败
+      const shaUrl=`https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/contents/${GITEE_CONFIG.file}?ref=${GITEE_CONFIG.branch}&access_token=${GITEE_CONFIG.token}`;
+      const shaRes=await fetch(shaUrl);
+      if(shaRes.ok){const shaData=await shaRes.json();GITEE_CONFIG._sha=shaData.sha}
+      
       const url=`https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/contents/${GITEE_CONFIG.file}`;
       const body={
         access_token:GITEE_CONFIG.token,
@@ -277,17 +284,17 @@ async function saveDB(data){
         message:'更新数据',
         branch:GITEE_CONFIG.branch
       };
-      // 如果有SHA，说明文件已存在，用PUT更新
       if(GITEE_CONFIG._sha){
         body.sha=GITEE_CONFIG._sha;
         const r=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const d=await r.json();
         if(d.content) GITEE_CONFIG._sha=d.content.sha;
+        else if(d.message) console.error('Gitee save error:',d.message);
       }else{
-        // 首次创建
         const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const d=await r.json();
         if(d.content) GITEE_CONFIG._sha=d.content.sha;
+        else if(d.message) console.error('Gitee create error:',d.message);
       }
     }catch(e){console.error('Gitee save:',e)}
   }
@@ -339,7 +346,7 @@ function buildContext(q,data){
   return parts.join('\n\n')||'（暂无数据）';
 }
 
-// ========== 长按进入管理 ==========
+// ========== 进入管理 ==========
 let pressTimer=null;
 const hdr=document.getElementById('hdr');
 function showPwDialog(){
@@ -357,9 +364,11 @@ function submitPw(){
   if(pw===getPw()){closePwDialog();openAdmin()}
   else if(pw){document.getElementById('pwInput').value='';document.getElementById('pwInput').placeholder='密码错误，重新输入';setTimeout(()=>document.getElementById('pwInput').placeholder='输入密码',2000)}
 }
+// 手机：长按3秒；电脑：双击标题栏
 hdr.addEventListener('touchstart',()=>{pressTimer=setTimeout(showPwDialog,3000)});
 hdr.addEventListener('touchend',()=>clearTimeout(pressTimer));
 hdr.addEventListener('touchmove',()=>clearTimeout(pressTimer));
+hdr.addEventListener('dblclick',showPwDialog);
 document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitPw()});
 
 function openAdmin(){document.getElementById('adminMask').classList.add('show');document.getElementById('adminPanel').classList.add('show');switchTab('org')}
@@ -385,7 +394,7 @@ async function switchTab(k){
   items.forEach(item=>{
     html+=`<div class="item-card"><div class="name">${item.img?'🖼️ ':''}${item.name||item.title||item.q||item.course||'#'+item.id}</div>`;
     html+=`<div class="meta">${fields.filter(f=>!['name','title','q'].includes(f.k)).map(f=>item[f.k]).filter(Boolean).join(' | ')}</div>`;
-    html+=`<div class="acts"><button onclick="delItem('${k}',${item.id})">删除</button></div></div>`;
+    html+=`<div class="acts"><button class="btn-edit" onclick="editItem('${k}',${item.id})">✏️ 编辑</button><button class="btn-del" onclick="delItem('${k}',${item.id})">🗑️ 删除</button></div></div>`;
   });
   if(!items.length)html+='<p style="text-align:center;color:var(--gray);padding:20px">暂无数据</p>';
   html+='<div style="border-top:1px solid var(--border);margin:12px 0;padding-top:12px;font-weight:600;font-size:13px">➕ 添加新数据</div>';
@@ -607,6 +616,38 @@ async function delItem(k,id){
   const data=await getData();
   data[k]=(data[k]||[]).filter(i=>i.id!==id);
   await saveDB(data);cachedData=data;switchTab(k);
+}
+
+async function editItem(k,id){
+  const data=await getData();
+  const item=(data[k]||[]).find(i=>i.id===id);
+  if(!item)return;
+  const fields=FIELDS[k]||[];
+  const el=document.getElementById('adminContent');
+  let html=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <button onclick="switchTab('${k}')" style="padding:4px 12px;border-radius:8px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:13px">← 返回列表</button>
+    <span style="font-weight:600;font-size:14px">✏️ 编辑：${item.name||item.title||item.q||item.course||'#'+item.id}</span>
+  </div>`;
+  fields.forEach(f=>{
+    html+=`<label>${f.l}</label>`;
+    const val=item[f.k]??'';
+    if(f.t==='textarea')html+=`<textarea id="edit_${f.k}">${val}</textarea>`;
+    else if(f.t==='number')html+=`<input type="number" id="edit_${f.k}" value="${val}">`;
+    else if(f.t==='image')html+=`<div class="avatar-upload"><div class="avatar-preview" id="edit_${f.k}_preview" style="width:60px;height:60px;font-size:10px">${val?'<img src="'+val+'">':'无'}</div><div class="avatar-upload-btn" onclick="pickItemImg('edit_${f.k}')">📷 选取</div><div class="avatar-upload-btn" onclick="clearItemImg('edit_${f.k}')" style="color:var(--red)">✕</div></div><input type="hidden" id="edit_${f.k}" value="${val}">`;
+    else html+=`<input id="edit_${f.k}" value="${val}">`;
+  });
+  html+=`<button class="add-btn" onclick="saveEdit('${k}',${id})">💾 保存修改</button>`;
+  el.innerHTML=html;
+}
+
+async function saveEdit(k,id){
+  const data=await getData();
+  const idx=(data[k]||[]).findIndex(i=>i.id===id);
+  if(idx===-1)return;
+  const fields=FIELDS[k]||[];
+  fields.forEach(f=>{let v=(document.getElementById('edit_'+f.k)||{}).value||'';if(f.t==='number')v=Number(v)||0;data[k][idx][f.k]=v});
+  await saveDB(data);cachedData=data;
+  alert('✅ 修改已保存');switchTab(k);
 }
 
 function renderPw(el){
