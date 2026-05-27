@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>来点墨书法艺术培训中心</title><style>*{margin:0;padding:0;box-sizing:border-box}body{display:flex;justify-content:center;align-items:center;height:100vh;font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#f5f0e8;color:#1a1a1a;flex-direction:column;gap:12px}.spinner{width:36px;height:36px;border:3px solid #e0d8c8;border-top-color:#5c3a21;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}#err{display:none;color:#c23a2b;text-align:center;padding:20px}#retry{margin-top:8px;padding:8px 24px;background:#5c3a21;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer}</style></head><body><div class="spinner"></div><div>加载中...</div><div id="err">加载失败，请检查网络后重试<br><button id="retry" onclick="load()">重新加载</button></div><script>
+function load(){
+  document.querySelector('.spinner').style.display='';
+  document.querySelector('.spinner').nextElementSibling.style.display='';
+  document.getElementById('err').style.display='none';
+  fetch('https://gitee.com/api/v5/repos/lin041006/laidianmo/contents/index.html?ref=master')
+  .then(r=>{if(!r.ok)throw new Error(r.status);return r.json()})
+  .then(d=>{
+    if(!d.content)throw new Error('no content');
+    const html=decodeURIComponent(escape(atob(d.content)));
+    document.open();document.write(html);document.close();
+  }).catch(e=>{
+    document.querySelector('.spinner').style.display='none';
+    document.querySelector('.spinner').nextElementSibling.style.display='none';
+    document.getElementById('err').style.display='block';
+    console.error(e);
+  });
+}
+load();
+</script></body></html>
