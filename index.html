@@ -118,6 +118,7 @@ body{font-family:"PingFang SC","STSong","SimSun","Microsoft YaHei",serif;backgro
           <button onclick="Q('老师怎么样？')">👨‍🏫 师资力量</button>
           <button onclick="Q('5岁可以学吗？')">👶 适合年龄</button>
           <button onclick="Q('可以试听吗？')">🎧 试听体验</button>
+          <button onclick="showCampusQR()">📱 人工咨询</button>
         </div>
       </div>
     </div>
@@ -689,19 +690,42 @@ async function S(){
 }
 
 // ========== 二维码弹窗 ==========
-const QR_KW=['人工','真人','客服','微信','加微信','加我','联系','咨询老师','找老师','报名','预约','试听','体验课'];
-
 function checkShowQR(userMsg, botReply){
-  const combined=(userMsg+botReply).toLowerCase();
-  if(!QR_KW.some(kw=>combined.includes(kw)))return;
   const data=cachedData;
   if(!data?.campuses?.length)return;
-  // 找有二维码的校区
   const withQR=data.campuses.filter(c=>c.qrcode);
   if(!withQR.length)return;
-  // 尝试匹配用户提到的校区
-  let matched=withQR.find(c=>combined.includes(c.name))||withQR[0];
-  showQR(matched);
+  // 只有家长明确提到"XX校区+微信/人工"时才触发确认
+  const contactKW=['微信','人工','加微信','联系老师','客服微信','真人客服'];
+  const mentionedCampus=withQR.find(c=>userMsg.includes(c.name));
+  const wantsContact=contactKW.some(kw=>userMsg.includes(kw));
+  if(!mentionedCampus||!wantsContact)return;
+  addQRConfirm(mentionedCampus);
+}
+
+function addQRConfirm(campus){
+  const d=document.createElement('div');d.className='msg bot';
+  d.innerHTML=`<div class="av">${getBotAvHTML()}</div><div class="bbl">您是想添加<b>${campus.name}</b>的微信进行人工咨询吗？<div style="margin-top:8px;display:flex;gap:8px"><button onclick="showQRByName('${campus.name}')" style="padding:6px 16px;border:none;border-radius:8px;background:#222;color:#fff;font-size:13px;cursor:pointer">是的，查看二维码</button><button onclick="this.closest('.msg').remove()" style="padding:6px 16px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#333;font-size:13px;cursor:pointer">不用了</button></div></div>`;
+  M.appendChild(d);M.scrollTop=M.scrollHeight;
+}
+
+// 家长点"人工咨询"快捷按钮
+function showCampusQR(){
+  const data=cachedData;
+  if(!data?.campuses?.length)return addM('bot','暂无校区信息，请拨打咨询电话。');
+  const withQR=data.campuses.filter(c=>c.qrcode);
+  if(!withQR.length)return addM('bot','校区微信二维码尚未上传，请拨打咨询电话：'+(data.org?.phone||''));
+  if(withQR.length===1)return addQRConfirm(withQR[0]);
+  // 多个校区，让家长选
+  const d=document.createElement('div');d.className='msg bot';
+  const btns=withQR.map(c=>`<button onclick="addQRConfirm(cachedData.campuses.find(x=>x.name==='${c.name}'))" style="padding:6px 14px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:13px;cursor:pointer;margin:4px">${c.name}</button>`).join('');
+  d.innerHTML=`<div class="av">${getBotAvHTML()}</div><div class="bbl">请选择您想咨询的校区：<div style="margin-top:8px;display:flex;flex-wrap:wrap">${btns}</div></div>`;
+  M.appendChild(d);M.scrollTop=M.scrollHeight;
+}
+
+function showQRByName(name){
+  const campus=cachedData?.campuses?.find(c=>c.name===name&&c.qrcode);
+  if(campus)showQR(campus);
 }
 
 function showQR(campus){
